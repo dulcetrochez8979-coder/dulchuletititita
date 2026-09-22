@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mantenimiento de Categorías</title>
+    <!-- Vinculación del archivo de estilos CSS externo -->
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Mantenimiento de Categorías</h2>
+    
+    <div class="form-group">
+        <label for="id_categoria">ID_CATEGORIA</label>
+        <input type="text" id="id_categoria" placeholder="Ej. 1">
+    </div>
+
+    <div class="form-group">
+        <label for="nombre_categoria">NOMBRE_CATEGORIA</label>
+        <input type="text" id="nombre_categoria" placeholder="Ej. Bebidas">
+    </div>
+
+    <div class="form-group">
+        <label for="estado">ESTADO:</label>
+        <input type="text" id="estado" placeholder="Ej. Activo">
+    </div>
+
+    <div class="btn-container">
+         <button id="btnConectar" type="button">CONECTAR</button>
+         <button id="btnGuardar" type="button">GUARDAR</button>
+         <button id="btnbuscar" type="button">BUSCAR</button>
+         <button id="btnModificar" type="button">MODIFICAR</button>
+    </div>
+</div>
+
+<!-- 1. PRIMERO: Librería OFICIAL de Supabase (NO el simulador) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- 2. SEGUNDO: Tu archivo de lógica JavaScript externo -->
+<script src="script.js"></script>
+</body>
+</html>
