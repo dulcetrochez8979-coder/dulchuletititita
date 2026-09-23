@@ -1,88 +1,80 @@
 // 1. Tus credenciales
 const supabaseUrl = 'https://orakwbfuoxakludfslpv.supabase.co'; 
 const supabaseKey = 'sb_publishable_f5Enp-x0MZ7BfNYCNiSurA_ZlOqz-iF';
-
-// 2. Creamos el cliente UNA SOLA VEZ y de forma global
+// 2. Cliente de Supabase
 let supabaseClient = null;
 
-// 3. Esperamos a que el HTML esté cargado antes de buscar el botón
+// 3. Inicialización al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // Asignamos el evento click al botón CONECTAR
     const btnConectar = document.getElementById('btnConectar');
-    
+    const btnBuscar = document.getElementById('btnbuscar');
+
     if (btnConectar) {
         btnConectar.addEventListener('click', conectarSupabase);
-    } else {
-        console.error("No se encontró el botón btnConectar en el HTML");
-    }
-});
-const btnBuscar = document.getElementById('btnBuscar');
-    if (btnBuscar) {
-        btnBuscar.addEventListener('click', buscarCategoria);
-    } else {
-        console.error("No se encontró el botón btnBuscar en el HTML");
     }
 
-// 4. Función que se ejecuta al hacer clic en CONECTAR
+    if (btnBuscar) {
+        btnBuscar.addEventListener('click', buscarCategoria);
+    }
+});
+
+// 4. Conectar con Supabase
 function conectarSupabase() {
     try {
-        // Si aún no se ha creado el cliente, lo creamos
         if (!supabaseClient) {
             supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
         }
-        
-        // Si se crea correctamente, mostramos el mensaje
         alert("CONEXIÓN EXITOSA");
-        console.log("Cliente Supabase inicializado correctamente:", supabaseClient);
-        
+        console.log("Cliente Supabase listo:", supabaseClient);
     } catch (error) {
-        alert("ERROR DE CONEXIÓN");
-        console.error("Detalles del error:", error);
+        alert("ERROR DE CONEXIÓN: " + error.message);
+        console.error(error);
     }
-    async function buscarCategoria() {
-    // 1. Verificar que el cliente esté conectado
+}
+
+// 5. Buscar Categoría
+async function buscarCategoria() {
     if (!supabaseClient) {
-        alert("Primero debes conectarte 🔌");
+        alert("Primero debes hacer clic en CONECTAR 🔌");
         return;
     }
 
-    // 2. Obtener los valores del formulario
-    const id = document.getElementById('id_categoria').value.trim();
-    const nombre = document.getElementById('nombre_categoria').value.trim();
+    const idInput = document.getElementById('id_categoria').value.trim();
+    const nombreInput = document.getElementById('nombre_categoria').value.trim();
 
-    // 3. Validar que al menos uno esté lleno
-    if (!id && !nombre) {
+    if (!idInput && !nombreInput) {
         alert("Ingresa un ID o un Nombre para buscar ⚠️");
         return;
     }
 
     try {
-        // 4. Construir la consulta base
         let query = supabaseClient.from('categorias').select('*');
 
-        // 5. Filtrar según lo que el usuario escribió
-        if (id) {
-            query = query.eq('id_categoria', id);
-        }
-        if (nombre) {
-            query = query.ilike('nombre', `%${nombre}%`); // 'nombre' es el campo real en Supabase
+        // Si se ingresó un ID, convertir a entero si es número
+        if (idInput) {
+            const idNumber = parseInt(idInput, 10);
+            query = query.eq('id_categoria', isNaN(idNumber) ? idInput : idNumber);
         }
 
-        // 6. Ejecutar la consulta
+        // Si se ingresó Nombre
+        if (nombreInput) {
+            query = query.ilike('nombre', `%${nombreInput}%`); // Ajusta 'nombre' si tu columna se llama 'nombre_categoria'
+        }
+
         const { data, error } = await query;
 
-        if (error) throw error;
+        if (error) {
+            throw error;
+        }
 
-        // 7. Si no hay resultados
         if (!data || data.length === 0) {
             alert("No se encontró ninguna categoría ❌");
             return;
         }
 
-        // 8. Mostrar el primer resultado en el formulario
+        // Llenar campos con el primer resultado encontrado
         document.getElementById('id_categoria').value = data[0].id_categoria;
-        document.getElementById('nombre_categoria').value = data[0].nombre;
+        document.getElementById('nombre_categoria').value = data[0].nombre || data[0].nombre_categoria;
         document.getElementById('estado').value = data[0].estado;
 
         alert(`✅ Se encontraron ${data.length} resultado(s).`);
@@ -91,5 +83,4 @@ function conectarSupabase() {
         alert("Error al buscar ❌: " + error.message);
         console.error("Detalle del error:", error);
     }
-}
 }
