@@ -1,22 +1,21 @@
-// 1. Credentials
+// 1. Credenciales de Supabase
 const supabaseUrl = 'https://orakwbfuoxakludfslpv.supabase.co'; 
 const supabaseKey = 'sb_publishable_f5Enp-x0MZ7BfNYCNiSurA_ZlOqz-iF';
 
-// 2. Cliente de Supabase
+// 2. Variable global para la instancia
 let supabaseClient = null;
 
-// 3. Inicialización al cargar el DOM
+// 3. Vinculación de eventos al cargar el DOM
 document.addEventListener('DOMContentLoaded', () => {
-    // Inicializar el cliente directamente al cargar la página
+    // Inicializar el cliente si la CDN cargó correctamente
     if (typeof supabase !== 'undefined') {
         supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-        console.log("Cliente Supabase inicializado.");
+        console.log("Cliente de Supabase inicializado correctamente.");
     } else {
-        console.error("La librería de Supabase no se cargó correctamente.");
+        console.error("No se pudo cargar la librería SDK de Supabase desde el CDN.");
     }
 
     const btnConectar = document.getElementById('btnConectar');
-    // CORRECCIÓN: 'btnbuscar' en minúsculas coincide exactamente con el ID del HTML
     const btnBuscar = document.getElementById('btnbuscar'); 
 
     if (btnConectar) {
@@ -28,24 +27,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// 4. Conectar / Probar conexión con Supabase
+// 4. Test o reconexión manual
 function conectarSupabase() {
     try {
-        if (!supabaseClient) {
+        if (!supabaseClient && typeof supabase !== 'undefined') {
             supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
         }
         alert("CONEXIÓN EXITOSA CON SUPABASE 🔌");
-        console.log("Cliente Supabase listo:", supabaseClient);
+        console.log("Cliente listo:", supabaseClient);
     } catch (error) {
         alert("ERROR DE CONEXIÓN: " + error.message);
         console.error(error);
     }
 }
 
-// 5. Buscar Categoría
+// 5. Función de búsqueda
 async function buscarCategoria() {
     if (!supabaseClient) {
-        alert("La conexión con Supabase no se ha establecido ⚠️");
+        alert("La librería de Supabase no se ha inicializado ⚠️");
         return;
     }
 
@@ -60,13 +59,13 @@ async function buscarCategoria() {
     try {
         let query = supabaseClient.from('categorias').select('*');
 
-        // Filtrar por ID si fue ingresado
+        // Búsqueda exacta por ID (convierte a entero si aplica)
         if (idInput) {
             const idNumber = parseInt(idInput, 10);
             query = query.eq('id_categoria', isNaN(idNumber) ? idInput : idNumber);
         }
 
-        // Filtrar por Nombre si fue ingresado
+        // Búsqueda flexible por Nombre (case-insensitive)
         if (nombreInput) {
             query = query.ilike('nombre', `%${nombreInput}%`);
         }
@@ -82,7 +81,7 @@ async function buscarCategoria() {
             return;
         }
 
-        // Llenar campos del formulario con el primer resultado
+        // Asignación de valores al formulario
         document.getElementById('id_categoria').value = data[0].id_categoria;
         document.getElementById('nombre_categoria').value = data[0].nombre || data[0].nombre_categoria || '';
         document.getElementById('estado').value = data[0].estado || '';
@@ -90,7 +89,7 @@ async function buscarCategoria() {
         alert(`✅ Se encontraron ${data.length} resultado(s).`);
 
     } catch (error) {
-        alert("Error al buscar ❌: " + error.message);
-        console.error("Detalle del error:", error);
+        alert("Error al realizar la búsqueda ❌: " + error.message);
+        console.error("Detalle técnico del error:", error);
     }
 }
