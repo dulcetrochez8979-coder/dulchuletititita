@@ -1,13 +1,23 @@
-// 1. Tus credenciales
+// 1. Credentials
 const supabaseUrl = 'https://orakwbfuoxakludfslpv.supabase.co'; 
 const supabaseKey = 'sb_publishable_f5Enp-x0MZ7BfNYCNiSurA_ZlOqz-iF';
+
 // 2. Cliente de Supabase
 let supabaseClient = null;
 
-// 3. Inicialización al cargar la página
+// 3. Inicialización al cargar el DOM
 document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar el cliente directamente al cargar la página
+    if (typeof supabase !== 'undefined') {
+        supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        console.log("Cliente Supabase inicializado.");
+    } else {
+        console.error("La librería de Supabase no se cargó correctamente.");
+    }
+
     const btnConectar = document.getElementById('btnConectar');
-    const btnBuscar = document.getElementById('btnbuscar');
+    // CORRECCIÓN: 'btnbuscar' en minúsculas coincide exactamente con el ID del HTML
+    const btnBuscar = document.getElementById('btnbuscar'); 
 
     if (btnConectar) {
         btnConectar.addEventListener('click', conectarSupabase);
@@ -18,13 +28,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// 4. Conectar con Supabase
+// 4. Conectar / Probar conexión con Supabase
 function conectarSupabase() {
     try {
         if (!supabaseClient) {
             supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
         }
-        alert("CONEXIÓN EXITOSA");
+        alert("CONEXIÓN EXITOSA CON SUPABASE 🔌");
         console.log("Cliente Supabase listo:", supabaseClient);
     } catch (error) {
         alert("ERROR DE CONEXIÓN: " + error.message);
@@ -35,7 +45,7 @@ function conectarSupabase() {
 // 5. Buscar Categoría
 async function buscarCategoria() {
     if (!supabaseClient) {
-        alert("Primero debes hacer clic en CONECTAR 🔌");
+        alert("La conexión con Supabase no se ha establecido ⚠️");
         return;
     }
 
@@ -50,15 +60,15 @@ async function buscarCategoria() {
     try {
         let query = supabaseClient.from('categorias').select('*');
 
-        // Si se ingresó un ID, convertir a entero si es número
+        // Filtrar por ID si fue ingresado
         if (idInput) {
             const idNumber = parseInt(idInput, 10);
             query = query.eq('id_categoria', isNaN(idNumber) ? idInput : idNumber);
         }
 
-        // Si se ingresó Nombre
+        // Filtrar por Nombre si fue ingresado
         if (nombreInput) {
-            query = query.ilike('nombre', `%${nombreInput}%`); // Ajusta 'nombre' si tu columna se llama 'nombre_categoria'
+            query = query.ilike('nombre', `%${nombreInput}%`);
         }
 
         const { data, error } = await query;
@@ -72,10 +82,10 @@ async function buscarCategoria() {
             return;
         }
 
-        // Llenar campos con el primer resultado encontrado
+        // Llenar campos del formulario con el primer resultado
         document.getElementById('id_categoria').value = data[0].id_categoria;
-        document.getElementById('nombre_categoria').value = data[0].nombre || data[0].nombre_categoria;
-        document.getElementById('estado').value = data[0].estado;
+        document.getElementById('nombre_categoria').value = data[0].nombre || data[0].nombre_categoria || '';
+        document.getElementById('estado').value = data[0].estado || '';
 
         alert(`✅ Se encontraron ${data.length} resultado(s).`);
 
